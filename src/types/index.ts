@@ -21,6 +21,10 @@ export interface Service {
   image?: string;
   // Propriedade opcional para armazenar a URL normalizada da imagem no front-end
   normalizedImageUrl?: string;
+  // Propriedades adicionais para a visualização premium
+  benefits?: string[];
+  rating?: number;
+  popularityScore?: number;
   createdAt: string;
   updatedAt: string;
 }
