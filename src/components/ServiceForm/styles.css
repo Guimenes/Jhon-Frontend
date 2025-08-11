@@ -1,0 +1,506 @@
+/* Service Form Modal Styles */
+.service-form-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.service-form-modal .modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.service-form-modal .modal-content {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+}
+
+.service-form-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--primary-yellow);
+  background: #fafafa;
+}
+
+.service-form-modal .modal-header h2 {
+  color: var(--primary-black);
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.service-form-modal .modal-close {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.service-form-modal .modal-close:hover {
+  background: #f3f4f6;
+}
+
+.service-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.service-form .modal-body {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Para melhor rolagem em iOS */
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-black);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group label svg {
+  color: var(--primary-gold);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9ca3af;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.checkbox-label:hover {
+  background: #f9fafb;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-yellow);
+}
+
+.service-form .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  justify-content: center;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--primary-yellow);
+  color: var(--primary-black);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner.small {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Imagem Preview e Upload */
+.image-upload-container {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.image-upload-container:hover {
+  border-color: var(--primary-yellow);
+  background-color: rgba(255, 215, 0, 0.05);
+}
+
+.image-input {
+  display: none;
+}
+
+.image-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.image-upload-label svg {
+  color: var(--primary-gold);
+}
+
+.image-upload-label small {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.image-preview-container {
+  position: relative;
+  margin: 0.5rem 0;
+}
+
+.image-preview-container {
+  position: relative;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fafafa;
+  width: 100%;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.image-preview {
+  width: 100%;
+  height: 200px;
+  object-fit: contain; /* Mudado para contain para evitar distorção */
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remove-image-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #ef4444;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.remove-image-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Validação e erros */
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #ef4444;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.character-count {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.help-text {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Campo monetário com prefixo R$ */
+.price-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.price-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.price-field {
+  padding-left: 42px !important;
+  text-align: left;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .service-form-modal {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  
+  .service-form-modal .modal-backdrop {
+    position: fixed;
+  }
+  
+  .service-form-modal .modal-content {
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    height: 100%;
+    max-height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .service-form-modal .modal-header {
+    padding: 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--white);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .service-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .service-form .modal-body {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .service-form .modal-footer {
+    flex-direction: column;
+    padding: 1.25rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: var(--white);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  }
+
+  .service-form .modal-footer .btn {
+    width: 100%;
+    padding: 0.85rem;
+    height: 50px;
+  }
+  
+  /* Ajustes para inputs em telas pequenas */
+  .form-group {
+    margin-bottom: 0.85rem;
+  }
+  
+  .form-group input, 
+  .form-group select, 
+  .form-group textarea {
+    font-size: 16px; /* Evita zoom automático em iOS */
+    padding: 0.85rem;
+  }
+  
+  .image-preview {
+    height: 180px;
+  }
+  
+  /* Ajuste no campo de preço para melhor visualização */
+  .price-input-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .price-input-container::before {
+    font-size: 16px;
+    left: 12px;
+  }
+}
+
+/* Ajustes específicos para telas muito pequenas */
+@media (max-width: 380px) {
+  .service-form-modal .modal-header h2 {
+    font-size: 1.15rem;
+  }
+  
+  .service-form-modal .modal-header {
+    padding: 1rem;
+  }
+  
+  .service-form .modal-body {
+    padding: 1rem;
+  }
+  
+  .service-form .modal-footer {
+    padding: 1rem;
+  }
+  
+  .form-group {
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem;
+  }
+  
+  .image-upload-container {
+    padding: 1.25rem 0.75rem;
+  }
+  
+  .image-upload-label span {
+    font-size: 0.85rem;
+  }
+  
+  .image-upload-label small {
+    font-size: 0.75rem;
+  }
+}
