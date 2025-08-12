@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Star, Award, Users, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +11,18 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onBookingClick }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Gerar partículas uma única vez para manter consistência
+  const particles = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      animationDelay: Math.random() * 20,
+      animationDuration: 15 + Math.random() * 10,
+      opacity: Math.random() * 0.8 + 0.2,
+      scale: Math.random() * 0.5 + 0.5
+    }));
+  }, []); // Array vazio garante que seja criado apenas uma vez
 
    () => {
     if (user) {
@@ -25,16 +37,16 @@ const Hero: React.FC<HeroProps> = ({ onBookingClick }) => {
         <div className="hero-overlay"></div>
         {/* Animated Particles */}
         <div className="particles-container">
-          {Array.from({ length: 50 }, (_, i) => (
+          {particles.map((particle) => (
             <div
-              key={i}
+              key={particle.id}
               className="particle"
               style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 20}s`,
-                animationDuration: `${15 + Math.random() * 10}s`,
-                opacity: Math.random() * 0.8 + 0.2,
-                transform: `scale(${Math.random() * 0.5 + 0.5})`
+                left: `${particle.left}%`,
+                animationDelay: `${particle.animationDelay}s`,
+                animationDuration: `${particle.animationDuration}s`,
+                opacity: particle.opacity,
+                transform: `scale(${particle.scale})`
               }}
             />
           ))}
