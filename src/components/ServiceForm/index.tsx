@@ -14,7 +14,6 @@ import {
 import type { Service } from '../../types';
 import { normalizeImageUrl, createImageFallbackHandler } from '../../utils/imageUtils';
 import './styles.css';
-import './loading.css';
 
 interface ServiceFormProps {
   service?: Service | null;

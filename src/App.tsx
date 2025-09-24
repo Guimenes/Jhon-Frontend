@@ -7,6 +7,7 @@ import ServicesSection from './components/ServicesSection'
 import AboutSection from './components/AboutSection'
 import GallerySection from './components/GallerySection'
 import ShopSection from './components/ShopSection'
+import ContactSection from './components/ContactSection'
 import AuthPage from './pages/Auth'
 import AdminServices from './pages/AdminServices'
 import AdminSchedules from './pages/AdminSchedules'
@@ -89,12 +90,7 @@ function App() {
                       subtitle="Escolha os produtos ideais para seu estilo"
                     />
                     
-                    <section id="contato" style={{ padding: '100px 0', textAlign: 'center' }}>
-                      <div className="container">
-                        <h2>Contato</h2>
-                        <p>Em breve: Informações de contato e localização</p>
-                      </div>
-                    </section>
+                    <ContactSection />
                   </main>
                 } />
                 <Route path="/login" element={<AuthPage />} />

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Trophy, Clock, Sparkles, Shield, TrendingUp, Users } from 'lucide-react';
+import {Shield, TrendingUp, Users } from 'lucide-react';
 import './styles.css';
 
 const AboutSection: React.FC = () => {
@@ -24,29 +24,6 @@ const AboutSection: React.FC = () => {
       animatedElements.forEach(el => observer.unobserve(el));
     };
   }, []);
-
-  const stats = [
-    { 
-      icon: <Trophy className="stat-icon" />, 
-      number: '10K+', 
-      label: 'Cortes Realizados'
-    },
-    { 
-      icon: <Clock className="stat-icon" />, 
-      number: '12', 
-      label: 'Anos de Expertise'
-    },
-    { 
-      icon: <Sparkles className="stat-icon" />, 
-      number: '98%', 
-      label: 'Satisfação'
-    },
-    { 
-      icon: <Shield className="stat-icon" />, 
-      number: '#1', 
-      label: 'Top Rated'
-    }
-  ];
 
   const expertise = [
     { 
@@ -115,17 +92,6 @@ const AboutSection: React.FC = () => {
                 }}
               />
               <div className="hero-overlay">
-                <div className="hero-stats">
-                  {stats.map((stat, index) => (
-                    <div key={index} className="stat-item">
-                      {stat.icon}
-                      <div className="stat-content">
-                        <span className="stat-number">{stat.number}</span>
-                        <span className="stat-label">{stat.label}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
@@ -223,28 +189,7 @@ const AboutSection: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="about-final-cta animate-on-scroll">
-          <div className="cta-content">
-            <h2 className="cta-title">
-              Pronto para sua melhor versão?
-            </h2>
-            <p className="cta-subtitle">
-              Junte-se aos milhares de clientes que confiam em nosso trabalho
-            </p>
-            <div className="cta-buttons">
-              <a href="#servicos" className="btn-modern btn-primary">
-                Ver Serviços
-              </a>
-              <a href="#contato" className="btn-modern btn-secondary">
-                Agendar Agora
-              </a>
-            </div>
-          </div>
-        </div>
-        
+        </div>     
       </div>
     </section>
   );

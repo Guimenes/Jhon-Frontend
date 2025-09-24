@@ -1,16 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Instagram, Eye, ThumbsUp } from 'lucide-react';
+import { 
+  Grid, 
+  Layers, 
+  Heart, 
+  Share2, 
+  Award, 
+  Scissors, 
+  Sparkles, 
+  Eye,
+  X,
+  Calendar
+} from 'lucide-react';
 import { galleryAPI } from '../../services/api';
-import { createImageFallbackHandler } from '../../utils/imageUtils';
 import './styles.css';
 
-// Interface adaptada para compatibilidade com a API
 interface GalleryPhoto {
   _id: string;
   title: string;
   category: string;
   imageUrl: string;
-  normalizedImageUrl?: string; // URL normalizada para exibição
+  normalizedImageUrl?: string;
   likes: number;
   isActive: boolean;
   createdAt: string;
@@ -18,72 +27,62 @@ interface GalleryPhoto {
 }
 
 const GallerySection: React.FC = () => {
-  // Estado para controle do slide atual
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchEndX, setTouchEndX] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState<GalleryPhoto | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('todos');
-  const [instagramHandle] = useState('@jhoncortesbarbershop');
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const galleryContainerRef = useRef<HTMLDivElement>(null);
-
-  // Categorias para filtro
-  const categories = [
-    { id: 'todos', label: 'Todos' },
-    { id: 'cortes', label: 'Cortes' },
-    { id: 'barbas', label: 'Barbas' },
-    { id: 'tratamentos', label: 'Tratamentos' },
-    { id: 'estilos', label: 'Estilos Completos' },
-  ];
-
-  // Dados da galeria (inicialmente vazio)
   const [galleryData, setGalleryData] = useState<GalleryPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Efeito para carregar as fotos da galeria da API
+  const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
+  const [isChangingView, setIsChangingView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Filtros compactos
+  const filters = [
+    { 
+      id: 'all', 
+      label: 'Todos', 
+      icon: <Layers size={16} />
+    },
+    { 
+      id: 'cortes', 
+      label: 'Cortes', 
+      icon: <Scissors size={16} />
+    },
+    { 
+      id: 'barbas', 
+      label: 'Barbas', 
+      icon: <Award size={16} />
+    },
+    { 
+      id: 'tratamentos', 
+      label: 'Tratamentos', 
+      icon: <Sparkles size={16} />
+    },
+  ];
+
+  // Carregar fotos da API
   useEffect(() => {
     const fetchGalleryData = async () => {
       try {
         setIsLoading(true);
         const photos = await galleryAPI.getAll();
         
-        console.log('Fotos recebidas da API:', photos);
-        
-        // Função para normalizar URLs de imagens da galeria
-        const normalizeGalleryImageUrl = (imageUrl: string) => {
-          // Se já for uma URL completa, retorna como está
-          if (imageUrl.startsWith('http')) {
-            return imageUrl;
-          }
-          
-          // Caso contrário, constrói a URL completa
+        const normalizeImageUrl = (imageUrl: string) => {
+          if (imageUrl.startsWith('http')) return imageUrl;
           const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
           const baseUrl = apiBaseUrl.replace(/\/api\/?$/, '');
           return `${baseUrl}${imageUrl}`;
         };
         
-        // Converter o formato da API para o formato usado pelo componente
-        const formattedPhotos = photos.map(photo => {
-          return {
-            _id: photo._id,
-            title: photo.title,
-            category: photo.category,
-            imageUrl: photo.imageUrl, // Manter o URL original
-            normalizedImageUrl: normalizeGalleryImageUrl(photo.imageUrl), // URL normalizada
-            likes: photo.likes,
-            isActive: photo.isActive,
-            createdAt: photo.createdAt,
-            updatedAt: photo.updatedAt
-          };
-        });
+        const formattedPhotos = photos.map(photo => ({
+          ...photo,
+          normalizedImageUrl: normalizeImageUrl(photo.imageUrl)
+        }));
         
-        console.log('Fotos formatadas para exibição:', formattedPhotos);
         setGalleryData(formattedPhotos);
         setIsLoading(false);
       } catch (error) {
-        console.error('Erro ao carregar fotos da galeria:', error);
+        console.error('Erro ao carregar galeria:', error);
         setIsLoading(false);
       }
     };
@@ -91,12 +90,40 @@ const GallerySection: React.FC = () => {
     fetchGalleryData();
   }, []);
 
-  // Filtrar fotos por categoria
-  const filteredPhotos = selectedCategory === 'todos' 
-    ? galleryData 
-    : galleryData.filter(photo => photo.category === selectedCategory);
+  // Função para mudar modo de visualização
+  const handleViewChange = async (newMode: 'grid' | 'masonry') => {
+    if (newMode === viewMode || isChangingView) {
+      console.log(`Tentativa de mudança ignorada: ${newMode} === ${viewMode} ou isChangingView: ${isChangingView}`);
+      return;
+    }
+    
+    setIsChangingView(true);
+    console.log(`🔄 Mudando de ${viewMode} para ${newMode}`);
+    
+    // Delay para transição suave
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
+    setViewMode(newMode);
+    
+    // Pequeno delay adicional para garantir que o DOM seja atualizado
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    setIsChangingView(false);
+    console.log(`✅ Mudança concluída para ${newMode}`);
+  };
 
-  // Efeito para animações ao rolar
+  // Filtrar fotos
+  const filteredPhotos = activeFilter === 'all' 
+    ? galleryData 
+    : galleryData.filter(photo => photo.category === activeFilter);
+
+  // Contador de fotos por categoria
+  const getCategoryCount = (categoryId: string) => {
+    if (categoryId === 'all') return galleryData.length;
+    return galleryData.filter(photo => photo.category === categoryId).length;
+  };
+
+  // Animações ao scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -109,89 +136,47 @@ const GallerySection: React.FC = () => {
       { threshold: 0.1 }
     );
     
-    const animatedElements = document.querySelectorAll('.gallery-animate');
-    animatedElements.forEach(el => observer.observe(el));
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    elements.forEach(el => observer.observe(el));
     
     return () => {
-      animatedElements.forEach(el => observer.unobserve(el));
+      elements.forEach(el => observer.unobserve(el));
     };
-  }, []);
-  
-  // Comentado temporariamente até termos a API de configurações do Instagram
-  /*
+  }, [filteredPhotos, viewMode]);
+
+  // Garantir re-render das imagens quando viewMode muda
   useEffect(() => {
-    const fetchInstagramSettings = async () => {
-      try {
-        // Implementar quando a API estiver pronta
-        // const settings = await settingsAPI.getInstagramHandle();
-        // setInstagramHandle(settings.handle);
-      } catch (error) {
-        console.error('Erro ao buscar configurações do Instagram:', error);
-      }
-    };
-    
-    fetchInstagramSettings();
-  }, []);
-  */
-
-  // Funções de controle do carrossel
-  const nextSlide = () => {
-    const totalSlides = Math.ceil(filteredPhotos.length / 4);
-    if (totalSlides > 1) {
-      setActiveSlide((prevSlide) => (prevSlide + 1) % totalSlides);
-    }
-  };
-
-  const prevSlide = () => {
-    const totalSlides = Math.ceil(filteredPhotos.length / 4);
-    if (totalSlides > 1) {
-      setActiveSlide((prevSlide) => (prevSlide - 1 + totalSlides) % totalSlides);
-    }
-  };
-
-  // Funções para controle por toque/swipe
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEndX(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX - touchEndX > 100) {
-      nextSlide();
-    }
-
-    if (touchEndX - touchStartX > 100) {
-      prevSlide();
-    }
-  };
-
-  // Funções para o modal
-  const openModal = (photo: GalleryPhoto) => {
-    // Garantir que a imagem tenha uma URL normalizada
-    if (!photo.normalizedImageUrl) {
-      const normalizedUrl = photo.imageUrl.startsWith('http')
-        ? photo.imageUrl
-        : `${(import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '')}${photo.imageUrl}`;
+    if (!isChangingView && galleryData.length > 0) {
+      console.log(`🖼️ Re-renderizando imagens para modo: ${viewMode}`);
       
-      photo = { ...photo, normalizedImageUrl: normalizedUrl };
+      // Aguardar o DOM atualizar
+      setTimeout(() => {
+        const images = document.querySelectorAll('.gallery-grid .card-image');
+        console.log(`Encontradas ${images.length} imagens para atualizar`);
+        
+        images.forEach((img, index) => {
+          if (img instanceof HTMLImageElement && img.src) {
+            // Força recarregamento da imagem
+            const originalSrc = img.src;
+            img.style.opacity = '0';
+            
+            setTimeout(() => {
+              img.src = originalSrc;
+              img.onload = () => {
+                img.style.opacity = '1';
+              };
+            }, index * 50); // Delay escalonado para efeito visual
+          }
+        });
+      }, 100);
     }
-    
-    setModalImage(photo);
-    setIsModalOpen(true);
-    document.body.style.overflow = 'hidden';
-  };
-  
-  // Função para curtir uma foto
-  const likePhoto = async (photoId: string) => {
+  }, [viewMode, isChangingView, galleryData]);
+
+  // Curtir foto
+  const likePhoto = async (photoId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
-      console.log('Curtindo foto:', photoId);
       const response = await galleryAPI.like(photoId);
-      console.log('Resposta da API:', response);
-      
-      // Atualizar o número de curtidas na lista
       setGalleryData(prevData => 
         prevData.map(photo => 
           photo._id === photoId 
@@ -200,13 +185,19 @@ const GallerySection: React.FC = () => {
         )
       );
       
-      // Se a foto estiver aberta no modal, atualizar lá também
-      if (modalImage && modalImage._id === photoId) {
+      if (modalImage?._id === photoId) {
         setModalImage(prev => prev ? { ...prev, likes: response.likes } : null);
       }
     } catch (error) {
-      console.error('Erro ao curtir foto:', error);
+      console.error('Erro ao curtir:', error);
     }
+  };
+
+  // Modal
+  const openModal = (photo: GalleryPhoto) => {
+    setModalImage(photo);
+    setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
   };
 
   const closeModal = () => {
@@ -215,167 +206,228 @@ const GallerySection: React.FC = () => {
     document.body.style.overflow = 'auto';
   };
 
-  // Efeito para resetar o slide atual quando a categoria muda
-  useEffect(() => {
-    // Resetar o slide atual ao mudar de categoria
-    setActiveSlide(0);
-  }, [selectedCategory, filteredPhotos.length]);
+  // Compartilhar
+  const sharePhoto = (photo: GalleryPhoto) => {
+    if (navigator.share) {
+      navigator.share({
+        title: photo.title,
+        text: `Confira este trabalho incrível de Jhon Cortes`,
+        url: window.location.href
+      });
+    }
+  };
+
+  // Formatar data
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
 
   return (
-    <section id="galeria" className="gallery-section">
-      <div className="container">
-        <div className="gallery-header gallery-animate">
-          <div className="section-subtitle">
-            <div className="subtitle-icon">
-              <Eye size={16} />
-            </div>
-            <span>NOSSOS TRABALHOS</span>
-          </div>
-          <h2 className="section-title">Galeria de Transformações</h2>
-          <p className="gallery-description">
-            Confira alguns dos nossos melhores trabalhos realizados na barbearia.
-            Cada imagem representa a qualidade e o cuidado que temos com nossos clientes.
+    <section id="galeria" ref={sectionRef} className="gallery-section-modern">
+      <div className="gallery-container container">
+        
+        {/* Header Premium */}
+        <div className="gallery-header animate-on-scroll">
+          <span className="gallery-badge">PORTFÓLIO</span>
+          <h2 className="gallery-title">
+            Arte em Cada <span className="highlight-gold">Detalhe</span>
+          </h2>
+          <p className="gallery-subtitle">
+            Resultados que falam por si. Cada foto representa nossa dedicação à perfeição.
           </p>
-        </div>
+        </div>  
 
-        {/* Filtros de categoria */}
-        <div className="gallery-filters gallery-animate">
-          {categories.map((category) => (
+        {/* Filtros Compactos */}
+        <div className="gallery-controls-modern animate-on-scroll">
+          <div className="filter-pills">
+            {filters.map((filter) => (
+              <button
+                key={filter.id}
+                className={`filter-pill ${activeFilter === filter.id ? 'active' : ''}`}
+                onClick={() => setActiveFilter(filter.id)}
+              >
+                <span className="pill-icon">{filter.icon}</span>
+                <span className="pill-label">{filter.label}</span>
+                <span className="pill-count">{getCategoryCount(filter.id)}</span>
+              </button>
+            ))}
+          </div>
+          
+          <div className="view-switcher">
             <button
-              key={category.id}
-              className={`gallery-filter-btn ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(category.id)}
+              className={`view-option ${viewMode === 'grid' ? 'active' : ''} ${isChangingView ? 'loading' : ''}`}
+              onClick={() => handleViewChange('grid')}
+              aria-label="Grade"
+              title="Visualização em Grade"
+              disabled={isChangingView}
             >
-              {category.label}
+              <Grid size={18} />
             </button>
-          ))}
+            <button
+              className={`view-option ${viewMode === 'masonry' ? 'active' : ''} ${isChangingView ? 'loading' : ''}`}
+              onClick={() => handleViewChange('masonry')}
+              aria-label="Mosaico"
+              title="Visualização em Mosaico"
+              disabled={isChangingView}
+            >
+              <Layers size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Carrossel de galeria */}
-        <div className="gallery-container" ref={galleryContainerRef}>
+        {/* Galeria Principal */}
+        <div 
+          className={`gallery-grid ${viewMode} ${isChangingView ? 'changing' : ''} animate-on-scroll`}
+          key={`gallery-${viewMode}`}
+        >
           {isLoading ? (
-            <div className="gallery-loading">
-              <span className="spinner"></span>
-              <p>Carregando imagens...</p>
-            </div>
+            Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} className="gallery-card skeleton">
+                <div className="skeleton-shimmer" />
+              </div>
+            ))
           ) : (
-          <div 
-            className="gallery-slider" 
-            ref={sliderRef}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            {filteredPhotos
-              .slice(activeSlide * 4, (activeSlide + 1) * 4)
-              .map((photo) => (
-                <div className="gallery-item gallery-animate" key={photo._id}>
-                  <div className="gallery-image-wrapper">
-                    <img 
-                      src={photo.normalizedImageUrl || photo.imageUrl}
-                      alt={photo.title} 
-                      className="gallery-image"
-                      onClick={() => openModal(photo)}
-                      loading="lazy"
-                      crossOrigin="anonymous"
-                      {...createImageFallbackHandler(photo.imageUrl, "https://placehold.co/600x800/1A1A1A/FFD700?text=Imagem+Indisponível")}
-                    />
-                    <div className="gallery-overlay">
-                      <h3>{photo.title}</h3>
-                      <div className="gallery-meta">
-                        <button 
-                          className="gallery-likes"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            likePhoto(photo._id);
-                          }}
+            filteredPhotos.map((photo, index) => (
+              <div 
+                key={`${photo._id}-${viewMode}-${index}`} 
+                className={`gallery-card animate-on-scroll ${viewMode === 'masonry' ? `masonry-item-${index % 3}` : ''}`}
+                onClick={() => openModal(photo)}
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className="card-image-wrapper">
+                  <img
+                    src={photo.normalizedImageUrl || photo.imageUrl}
+                    alt={photo.title}
+                    className="card-image"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    onError={(e) => {
+                      console.error('Erro ao carregar imagem:', photo.title);
+                      e.currentTarget.style.opacity = '0.5';
+                    }}
+                  />
+                  <div className="card-overlay">
+                    <div className="overlay-top">
+                      <span className="photo-category">{photo.category}</span>
+                    </div>
+                    <div className="overlay-content">
+                      <h3 className="photo-title">{photo.title}</h3>
+                      <div className="photo-actions">
+                        <button
+                          className="action-btn like-btn"
+                          onClick={(e) => likePhoto(photo._id, e)}
+                          aria-label="Curtir"
                         >
-                          <ThumbsUp size={16} />
-                          {photo.likes}
+                          <Heart size={18} />
+                          <span>{photo.likes}</span>
+                        </button>
+                        <button
+                          className="action-btn view-btn"
+                          aria-label="Visualizar"
+                        >
+                          <Eye size={18} />
                         </button>
                       </div>
-                      <button 
-                        className="gallery-view-btn"
-                        onClick={() => openModal(photo)}
-                      >
-                        Ver Detalhes
-                      </button>
                     </div>
                   </div>
                 </div>
-              ))}
-          </div>
-          )}
-
-          {/* Controles do carrossel */}
-          {!isLoading && filteredPhotos.length > 4 && (
-            <div className="gallery-controls">
-              <button className="gallery-control prev" onClick={prevSlide}>
-                <ChevronLeft size={24} />
-              </button>
-              <button className="gallery-control next" onClick={nextSlide}>
-                <ChevronRight size={24} />
-              </button>
-            </div>
+              </div>
+            ))
           )}
         </div>
 
-        {/* Indicadores de slide */}
-        {!isLoading && filteredPhotos.length > 4 && (
-          <div className="gallery-indicators">
-            {Array.from({ length: Math.ceil(filteredPhotos.length / 4) }).map((_, index) => (
-              <button 
-                key={index}
-                className={`gallery-indicator ${activeSlide === index ? 'active' : ''}`}
-                onClick={() => setActiveSlide(index)}
-              />
-            ))}
+        {/* CTA Section */}
+        <div className="gallery-cta animate-on-scroll">
+          <div className="cta-content">
+            <h3 className="cta-title">Pronto para sua transformação?</h3>
+            <p className="cta-text">
+              Agende seu horário e seja o próximo a aparecer em nossa galeria de sucessos.
+            </p>
+            <div className="cta-buttons">
+              <a href="#agendamento" className="btn-gallery primary">
+                Agendar Agora
+              </a>
+              <a 
+                href="https://instagram.com/jhoncortesbarbershop" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="btn-gallery secondary"
+              >
+                Ver Mais no Instagram
+              </a>
+            </div>
           </div>
-        )}
-
-        {/* Instagram CTA */}
-        <div className="instagram-cta gallery-animate">
-          <div className="instagram-icon">
-            <Instagram size={32} />
-          </div>
-          <div className="instagram-content">
-            <h3>Siga-nos no Instagram</h3>
-            <p>Acompanhe nossos trabalhos mais recentes e novidades da barbearia</p>
-          </div>
-          <a 
-            href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="btn btn-primary"
-          >
-            {instagramHandle}
-          </a>
         </div>
       </div>
 
-      {/* Modal de visualização */}
+      {/* Modal Ultra Moderno */}
       {isModalOpen && modalImage && (
-        <div className="gallery-modal" onClick={closeModal}>
-          <div className="gallery-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="gallery-modal-close" onClick={closeModal}>×</button>
-            <img 
-              src={modalImage.normalizedImageUrl || modalImage.imageUrl}
-              alt={modalImage.title} 
-              className="gallery-modal-image"
-              crossOrigin="anonymous"
-              {...createImageFallbackHandler(modalImage.imageUrl, "https://placehold.co/600x800/1A1A1A/FFD700?text=Imagem+Indisponível")}
-            />
-            <div className="gallery-modal-info">
-              <h3>{modalImage.title}</h3>
-              <p>Categoria: {categories.find(cat => cat.id === modalImage.category)?.label}</p>
-              <div className="gallery-modal-meta">
-                <button 
-                  className="gallery-likes"
-                  onClick={() => likePhoto(modalImage._id)}
-                >
-                  <ThumbsUp size={16} />
-                  {modalImage.likes}
-                </button>
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-modern" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-btn" onClick={closeModal}>
+              <X size={24} />
+            </button>
+            
+            <div className="modal-content-wrapper">
+              {/* Lado Esquerdo - Imagem */}
+              <div className="modal-image-container">
+                <img
+                  src={modalImage.normalizedImageUrl || modalImage.imageUrl}
+                  alt={modalImage.title}
+                  className="modal-photo"
+                />
+                <div className="modal-image-gradient" />
+              </div>
+              
+              {/* Lado Direito - Informações */}
+              <div className="modal-info-container">
+                <div className="modal-info-header">
+                  <span className="modal-badge">{modalImage.category}</span>
+                  <h2 className="modal-photo-title">{modalImage.title}</h2>
+                </div>
+                
+                <div className="modal-metadata">
+                  <div className="metadata-item">
+                    <Calendar size={16} />
+                    <span>{formatDate(modalImage.createdAt)}</span>
+                  </div>
+                  <div className="metadata-item">
+                    <Eye size={16} />
+                    <span>{Math.floor(Math.random() * 1000) + 100} visualizações</span>
+                  </div>
+                </div>
+                
+                <div className="modal-engagement">
+                  <button
+                    className="engagement-btn like-button"
+                    onClick={() => likePhoto(modalImage._id)}
+                  >
+                    <Heart size={20} />
+                    <span>{modalImage.likes}</span>
+                  </button>
+                  <button
+                    className="engagement-btn share-button"
+                    onClick={() => sharePhoto(modalImage)}
+                  >
+                    <Share2 size={20} />
+                    <span>Compartilhar</span>
+                  </button>
+                </div>
+                
+                <div className="modal-cta-section">
+                  <p className="modal-cta-text">
+                    Inspire-se com nosso trabalho e agende sua transformação
+                  </p>
+                  <a href="#agendamento" className="modal-cta-button" onClick={closeModal}>
+                    Quero Este Visual
+                  </a>
+                </div>
               </div>
             </div>
           </div>

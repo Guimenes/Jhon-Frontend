@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { 
+  User, 
+  Mail, 
+  Lock, 
+  Phone, 
+  Eye, 
+  EyeOff,
+  Scissors,
+  ArrowRight,
+} from 'lucide-react';
 import './styles.css';
 
 interface AuthFormData {
   name?: string;
-  identifier: string; // email ou telefone para login
-  email?: string; // email específico para registro
+  identifier: string;
+  email?: string;
   password: string;
   confirmPassword?: string;
   phone?: string;
@@ -25,11 +35,12 @@ const AuthPage: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
-  // Detecta se deve iniciar em modo login ou registro baseado na URL
   useEffect(() => {
     setIsLogin(location.pathname === '/login');
   }, [location.pathname]);
@@ -39,12 +50,9 @@ const AuthPage: React.FC = () => {
     
     let formattedValue = value;
     
-    // Formatação automática para telefone
     if (name === 'phone') {
-      // Remove tudo que não for número
       const numbers = value.replace(/\D/g, '');
       
-      // Aplica a máscara (11) 99999-9999
       if (numbers.length <= 2) {
         formattedValue = numbers;
       } else if (numbers.length <= 7) {
@@ -54,9 +62,7 @@ const AuthPage: React.FC = () => {
       }
     }
 
-    // Formatação para identifier no modo login (permite email ou telefone)
     if (name === 'identifier' && isLogin) {
-      // Se não contém @ e é numérico, aplica formatação de telefone
       if (!value.includes('@') && /^\d/.test(value)) {
         const numbers = value.replace(/\D/g, '');
         if (numbers.length <= 2) {
@@ -67,7 +73,7 @@ const AuthPage: React.FC = () => {
           formattedValue = `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
         }
       } else {
-        formattedValue = value; // Para email, mantém o valor original
+        formattedValue = value;
       }
     }
     
@@ -76,7 +82,6 @@ const AuthPage: React.FC = () => {
       [name]: formattedValue
     }));
     
-    // Limpar erro específico quando o usuário começar a digitar
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -89,11 +94,9 @@ const AuthPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (isLogin) {
-      // Validação para login (identifier + password)
       if (!formData.identifier) {
         newErrors.identifier = 'Email ou telefone é obrigatório';
       } else {
-        // Verificar se é email ou telefone
         const isEmail = formData.identifier.includes('@');
         if (isEmail) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -101,7 +104,6 @@ const AuthPage: React.FC = () => {
             newErrors.identifier = 'Email inválido';
           }
         } else {
-          // Validar formato do telefone
           const phoneNumbers = formData.identifier.replace(/\D/g, '');
           if (phoneNumbers.length < 10 || phoneNumbers.length > 11) {
             newErrors.identifier = 'Telefone deve ter 10 ou 11 dígitos';
@@ -109,12 +111,10 @@ const AuthPage: React.FC = () => {
         }
       }
     } else {
-      // Validação para registro
       if (!formData.name || formData.name.trim().length < 2) {
         newErrors.name = 'Nome deve ter pelo menos 2 caracteres';
       }
 
-      // Validação de email para registro
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email) {
         newErrors.email = 'Email é obrigatório';
@@ -125,7 +125,6 @@ const AuthPage: React.FC = () => {
       if (!formData.phone || formData.phone.trim().length < 10) {
         newErrors.phone = 'Telefone deve ter pelo menos 10 dígitos';
       } else {
-        // Remove caracteres não numéricos para validação
         const phoneNumbers = formData.phone.replace(/\D/g, '');
         if (phoneNumbers.length < 10 || phoneNumbers.length > 11) {
           newErrors.phone = 'Telefone deve ter 10 ou 11 dígitos';
@@ -139,7 +138,6 @@ const AuthPage: React.FC = () => {
       }
     }
 
-    // Validação de senha (comum para login e registro)
     if (!formData.password) {
       newErrors.password = 'Senha é obrigatória';
     } else if (formData.password.length < 6) {
@@ -190,24 +188,27 @@ const AuthPage: React.FC = () => {
       phone: ''
     });
     setErrors({});
-    
-    // Navega para a URL apropriada
     navigate(newIsLogin ? '/login' : '/register', { replace: true });
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <div className="logo-section">
-              <h1 className="brand-title">Jhon Cortes</h1>
-              <p className="brand-subtitle">Barber Shop</p>
+    <div className="auth-page-modern">
+      <div className="auth-container-modern">
+        <div className="auth-form-section">
+          <div className="auth-form-content">
+            {/* Logo */}
+            <div className="auth-logo-section">
+              <div className="logo-icon">
+                <Scissors size={32} />
+              </div>
+              <h1 className="brand-name">Jhon Cortes</h1>
+              <p className="brand-tagline">Premium Barber Shop</p>
             </div>
-            
-            <div className="auth-tabs">
+
+            {/* Tabs */}
+            <div className="auth-tabs-modern">
               <button 
-                className={`tab-btn ${isLogin ? 'active' : ''}`}
+                className={`tab-modern ${isLogin ? 'active' : ''}`}
                 onClick={() => {
                   setIsLogin(true);
                   navigate('/login', { replace: true });
@@ -217,7 +218,7 @@ const AuthPage: React.FC = () => {
                 Entrar
               </button>
               <button 
-                className={`tab-btn ${!isLogin ? 'active' : ''}`}
+                className={`tab-modern ${!isLogin ? 'active' : ''}`}
                 onClick={() => {
                   setIsLogin(false);
                   navigate('/register', { replace: true });
@@ -226,144 +227,180 @@ const AuthPage: React.FC = () => {
               >
                 Criar Conta
               </button>
+              <div className={`tab-indicator ${!isLogin ? 'right' : ''}`} />
             </div>
-          </div>
 
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="form-content">
+            {/* Form */}
+            <form className="auth-form-modern" onSubmit={handleSubmit}>
               {!isLogin && (
-                <div className="input-group">
-                  <label htmlFor="name">Nome Completo</label>
+                <div className="input-group-modern">
+                  <div className="input-icon">
+                    <User size={20} />
+                  </div>
                   <input
                     type="text"
-                    id="name"
                     name="name"
                     value={formData.name || ''}
                     onChange={handleInputChange}
                     className={errors.name ? 'error' : ''}
-                    placeholder="Digite seu nome completo"
+                    placeholder="Nome completo"
                   />
-                  {errors.name && <span className="error-message">{errors.name}</span>}
+                  {errors.name && <span className="error-text">{errors.name}</span>}
                 </div>
               )}
 
               {!isLogin && (
-                <div className="input-group">
-                  <label htmlFor="phone">Telefone</label>
+                <div className="input-group-modern">
+                  <div className="input-icon">
+                    <Phone size={20} />
+                  </div>
                   <input
                     type="tel"
-                    id="phone"
                     name="phone"
                     value={formData.phone || ''}
                     onChange={handleInputChange}
                     className={errors.phone ? 'error' : ''}
                     placeholder="(11) 99999-9999"
                   />
-                  {errors.phone && <span className="error-message">{errors.phone}</span>}
+                  {errors.phone && <span className="error-text">{errors.phone}</span>}
                 </div>
               )}
 
               {!isLogin && (
-                <div className="input-group">
-                  <label htmlFor="email">Email</label>
+                <div className="input-group-modern">
+                  <div className="input-icon">
+                    <Mail size={20} />
+                  </div>
                   <input
                     type="email"
-                    id="email"
                     name="email"
                     value={formData.email || ''}
                     onChange={handleInputChange}
                     className={errors.email ? 'error' : ''}
-                    placeholder="Digite seu email"
+                    placeholder="Email"
                   />
-                  {errors.email && <span className="error-message">{errors.email}</span>}
+                  {errors.email && <span className="error-text">{errors.email}</span>}
                 </div>
               )}
 
               {isLogin && (
-                <div className="input-group">
-                  <label htmlFor="identifier">Email ou Telefone</label>
+                <div className="input-group-modern">
+                  <div className="input-icon">
+                    <Mail size={20} />
+                  </div>
                   <input
                     type="text"
-                    id="identifier"
                     name="identifier"
                     value={formData.identifier}
                     onChange={handleInputChange}
                     className={errors.identifier ? 'error' : ''}
-                    placeholder="Digite seu email ou telefone"
+                    placeholder="Email ou telefone"
                   />
-                  {errors.identifier && <span className="error-message">{errors.identifier}</span>}
+                  {errors.identifier && <span className="error-text">{errors.identifier}</span>}
                 </div>
               )}
 
-              <div className="input-group">
-                <label htmlFor="password">Senha</label>
+              <div className="input-group-modern">
+                <div className="input-icon">
+                  <Lock size={20} />
+                </div>
                 <input
-                  type="password"
-                  id="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
                   className={errors.password ? 'error' : ''}
-                  placeholder="Digite sua senha"
+                  placeholder="Senha"
                 />
-                {errors.password && <span className="error-message">{errors.password}</span>}
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {errors.password && <span className="error-text">{errors.password}</span>}
               </div>
 
               {!isLogin && (
-                <div className="input-group">
-                  <label htmlFor="confirmPassword">Confirmar Senha</label>
+                <div className="input-group-modern">
+                  <div className="input-icon">
+                    <Lock size={20} />
+                  </div>
                   <input
-                    type="password"
-                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={formData.confirmPassword || ''}
                     onChange={handleInputChange}
                     className={errors.confirmPassword ? 'error' : ''}
-                    placeholder="Confirme sua senha"
+                    placeholder="Confirmar senha"
                   />
-                  {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                  <button
+                    type="button"
+                    className="toggle-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                  {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
                 </div>
               )}
 
               {errors.submit && (
-                <div className="error-message submit-error">
+                <div className="error-message-box">
                   {errors.submit}
                 </div>
               )}
 
               <button 
                 type="submit" 
-                className="auth-submit-btn"
+                className="submit-btn-modern"
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <span className="loading">
-                    <span className="spinner"></span>
+                {/* Conteúdo normal do botão */}
+                <span 
+                  style={{ 
+                    opacity: isLoading ? 0 : 1, 
+                    transition: 'opacity 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
+                  }}
+                >
+                  <span>{isLogin ? 'Entrar' : 'Criar Conta'}</span>
+                  <ArrowRight size={20} />
+                </span>
+                
+                {/* Estado de carregamento */}
+                {isLoading && (
+                  <span className="loading-state">
+                    <span className="spinner-modern"></span>
                     Processando...
                   </span>
-                ) : (
-                  isLogin ? 'Entrar' : 'Criar Conta'
                 )}
               </button>
-            </div>
-          </form>
 
-          <div className="auth-footer">
-            <p>
-              {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}
+              {isLogin && (
+                <a href="/forgot-password" className="forgot-link">
+                  Esqueceu sua senha?
+                </a>
+              )}
+            </form>
+
+            {/* Footer */}
+            <div className="auth-footer-modern">
+              <p>
+                {isLogin ? 'Novo por aqui?' : 'Já tem uma conta?'}
+              </p>
               <button 
                 type="button"
-                className="toggle-btn"
+                className="switch-mode-btn"
                 onClick={toggleMode}
               >
-                {isLogin ? 'Criar conta' : 'Fazer login'}
+                {isLogin ? 'Criar conta grátis' : 'Fazer login'}
               </button>
-            </p>
+            </div>
           </div>
-        </div>
-
-        <div className="auth-background">
-          <div className="barber-pattern"></div>
         </div>
       </div>
     </div>
